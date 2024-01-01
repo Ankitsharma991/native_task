@@ -5,7 +5,7 @@ import UserDetails from "./User-Details";
 export default function App() {
   return (
     <>
-      <Text>Hello E-commerce</Text>
+      <UserDetails />
     </>
   );
 }
