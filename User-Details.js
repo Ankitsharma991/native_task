@@ -1,22 +1,20 @@
-import React, { useState, useEffect } from "react";
-import {
-  View,
-  Text,
-  TextInput,
-  FlatList,
-  TouchableOpacity,
-} from "react-native";
-import styles from "./Styles";
+// UserDetails.js
+import React, { useState, useEffect } from 'react';
+import { View, Text, TextInput, FlatList, TouchableOpacity } from 'react-native';
+import styles from './Styles';
+import EditModal from './EditModal';
 
 const ApiEndpoint =
-  "https://geektrust.s3-ap-southeast-1.amazonaws.com/adminui-problem/members.json";
+  'https://geektrust.s3-ap-southeast-1.amazonaws.com/adminui-problem/members.json';
 
 const UserDetails = () => {
   const [data, setData] = useState([]);
   const [filteredData, setFilteredData] = useState([]);
-  const [searchText, setSearchText] = useState("");
+  const [searchText, setSearchText] = useState('');
   const [selectedRows, setSelectedRows] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
+  const [editModalVisible, setEditModalVisible] = useState(false);
+  const [editModalData, setEditModalData] = useState({});
   const pageSize = 10;
 
   const fetchData = async () => {
@@ -26,7 +24,7 @@ const UserDetails = () => {
       setData(jsonData);
       setFilteredData(jsonData);
     } catch (error) {
-      alert("Something went Wrong!!");
+      alert('Something went Wrong!!');
     }
   };
 
@@ -65,15 +63,42 @@ const UserDetails = () => {
     setSelectedRows([]);
   };
 
+  const handleEditPage = () => {
+    if (selectedRows.length === 1) {
+      const selectedId = selectedRows[0];
+      const selectedUserData = data.find((item) => item.id === selectedId);
+      setEditModalData(selectedUserData);
+      setEditModalVisible(true);
+    }
+  };
+
+  const handleCancelEdit = () => {
+    setEditModalVisible(false);
+  };
+
+  const handleOkEdit = ({ name, email, role }) => {
+    // Implement your logic to update the data
+    // For now, just close the modal
+
+    const updatedData = data.map((item) =>
+      item.id === editModalData.id ? { ...item, name, email, role } : item
+    );
+
+    setData(updatedData);
+    setFilteredData(updatedData);
+
+    setEditModalVisible(false);
+  };
+
   const renderRow = ({ item }) => (
     <TouchableOpacity
       style={{
         backgroundColor: selectedRows.includes(item.id)
-          ? "#CCCCCC"
-          : "transparent",
+          ? '#CCCCCC'
+          : 'transparent',
         padding: 10,
         borderBottomWidth: 1,
-        borderBottomColor: "#DDD",
+        borderBottomColor: '#DDD',
       }}
       onPress={() => handleSelectRow(item.id)}
     >
@@ -158,12 +183,25 @@ const UserDetails = () => {
           <Text style={styles.deleteButtonText}>Delete Selected</Text>
         </TouchableOpacity>
         <TouchableOpacity
-          style={styles.deleteButton}
-          onPress={handleDeletePage}
+          style={[
+            styles.deleteButton,
+            { opacity: selectedRows.length === 0 ? 0.5 : 1 },
+          ]}
+          onPress={handleEditPage}
+          disabled={selectedRows.length !== 1}
         >
+          <Text style={styles.deleteButtonText}>Edit Selected</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.deleteButton} onPress={handleDeletePage}>
           <Text style={styles.deleteButtonText}>Delete Page</Text>
         </TouchableOpacity>
       </View>
+      <EditModal
+        isVisible={editModalVisible}
+        onCancel={handleCancelEdit}
+        onOk={handleOkEdit}
+        initialData={editModalData}
+      />
     </View>
   );
 };
