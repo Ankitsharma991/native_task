@@ -1,10 +1,11 @@
-// UserDetails.js
 import React, { useState, useEffect } from 'react';
 import { View, Text, TextInput, FlatList, TouchableOpacity } from 'react-native';
 import styles from './Styles';
 import EditModal from './EditModal';
 import { AntDesign } from '@expo/vector-icons';
 import { FontAwesome } from '@expo/vector-icons';
+import { CheckBox } from 'react-native-elements';
+
 
 const ApiEndpoint =
   'https://geektrust.s3-ap-southeast-1.amazonaws.com/adminui-problem/members.json';
@@ -19,6 +20,10 @@ const UserDetails = () => {
   const [editModalData, setEditModalData] = useState({});
   const pageSize = 10;
 
+
+  const [isCheckboxVisible, setIsCheckboxVisible] = useState(false);
+  const [selectedUserId, setSelectedUserId] = useState(null);
+
   const fetchData = async () => {
     try {
       const response = await fetch(ApiEndpoint);
@@ -26,7 +31,7 @@ const UserDetails = () => {
       setData(jsonData);
       setFilteredData(jsonData);
     } catch (error) {
-      alert('Something went Wrong!!');
+      alert(error.message);
     }
   };
 
@@ -50,11 +55,18 @@ const UserDetails = () => {
   };
 
   const handleSelectRow = (id) => {
-    const isSelected = selectedRows.includes(id);
-    if (isSelected) {
-      setSelectedRows(selectedRows.filter((rowId) => rowId !== id));
+    if (isCheckboxVisible) {
+      const isSelected = selectedRows.includes(id);
+      if (isSelected) {
+        setSelectedRows(selectedRows.filter((rowId) => rowId !== id));
+      } else {
+        setSelectedRows([...selectedRows, id]);
+      }
     } else {
-      setSelectedRows([...selectedRows, id]);
+      // Show checkboxes on long press
+      setIsCheckboxVisible(true);
+      setSelectedRows([id]);
+      setSelectedUserId(id);
     }
   };
 
@@ -63,6 +75,7 @@ const UserDetails = () => {
     setData(updatedData);
     setFilteredData(updatedData);
     setSelectedRows([]);
+    setIsCheckboxVisible(false);
   };
 
   const handleCancelEdit = () => {
@@ -89,7 +102,10 @@ const UserDetails = () => {
     setData(updatedData);
     setFilteredData(updatedData);
     setSelectedRows([]);
+    setIsCheckboxVisible(false);
   };
+  const [checked, setChecked] = useState(false);
+
 
   const renderRow = ({ item }) => (
     <TouchableOpacity
@@ -100,30 +116,44 @@ const UserDetails = () => {
         padding: 10,
         borderBottomWidth: 1,
         borderBottomColor: '#DDD',
+        flexDirection: 'row',
+        alignItems: 'center',
       }}
-      onPress={() => handleSelectRow(item.id)}
+      // onPress={}
+      onLongPress={() => {
+        {
+          handleSelectRow(item.id)
+          setIsCheckboxVisible(!isCheckboxVisible)
+        }
+      }}
     >
-      <View style={styles.UserDetailsBox}>
-        <View>
-          <Text>{item.name}</Text>
-          <Text>{item.email}</Text>
-          <Text>{item.role}</Text>
+      {isCheckboxVisible && (
+        <View style={{ marginRight: 10 }}>
+          <CheckBox
+            checked={selectedRows.includes(item.id)}
+            onPress={() => handleSelectRow(item.id)}
+          />
         </View>
-        <View style={styles.actionIcons}>
-          <TouchableOpacity onPress={() => handleDeleteUser(item.id)}>
-            <View style={styles.deleteButtonText}>
-              <AntDesign name="delete" size={20} color="black" />
-            </View>
-          </TouchableOpacity>
-          <TouchableOpacity onPress={() => handleEditUser(item.id)}>
-            <View style={styles.deleteButtonText}>
-              <FontAwesome style={styles.deleteButtonText} name="edit" size={20} color="black" />
-            </View>
-          </TouchableOpacity>
-        </View>
+      )}
+
+      <View>
+        <Text>{item.name}</Text>
+        <Text>{item.email}</Text>
+        <Text>{item.role}</Text>
+      </View>
+      <View style={{ flexDirection: 'row', marginLeft: 'auto' }}>
+        <TouchableOpacity onPress={() => handleDeleteUser(item.id)}>
+          <View style={{ marginRight: 10 }}>
+            <AntDesign name="delete" size={20} color="black" />
+          </View>
+        </TouchableOpacity>
+        <TouchableOpacity onPress={() => handleEditUser(item.id)}>
+          <FontAwesome name="edit" size={20} color="black" />
+        </TouchableOpacity>
       </View>
     </TouchableOpacity>
   );
+
 
   const handleDeletePage = () => {
     const startIdx = (currentPage - 1) * pageSize;
