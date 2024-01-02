@@ -63,7 +63,6 @@ const UserDetails = () => {
         setSelectedRows([...selectedRows, id]);
       }
     } else {
-      // Show checkboxes on long press
       setIsCheckboxVisible(true);
       setSelectedRows([id]);
       setSelectedUserId(id);
