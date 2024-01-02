@@ -4,7 +4,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     padding: 10,
-    marginTop:10,
+    marginTop: 10,
     backgroundColor: "#fff",
   },
   searchInput: {
@@ -51,6 +51,19 @@ const styles = StyleSheet.create({
     justifyContent: "space-around",
     marginTop: 10,
   },
+  UserDetailsBox: {
+    display: "flex",
+    flexDirection: "row",
+    justifyContent: 'space-between',
+  },
+  actionIcons: {
+    display: 'flex',
+    flexDirection: 'row',
+    flex: 1,
+    justifyContent: 'flex-end',
+    columnGap: 10,
+    alignItems: 'center'
+  }
 });
 
 export default styles;

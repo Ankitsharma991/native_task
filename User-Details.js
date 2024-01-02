@@ -3,6 +3,8 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, TextInput, FlatList, TouchableOpacity } from 'react-native';
 import styles from './Styles';
 import EditModal from './EditModal';
+import { AntDesign } from '@expo/vector-icons';
+import { FontAwesome } from '@expo/vector-icons';
 
 const ApiEndpoint =
   'https://geektrust.s3-ap-southeast-1.amazonaws.com/adminui-problem/members.json';
@@ -63,31 +65,30 @@ const UserDetails = () => {
     setSelectedRows([]);
   };
 
-  const handleEditPage = () => {
-    if (selectedRows.length === 1) {
-      const selectedId = selectedRows[0];
-      const selectedUserData = data.find((item) => item.id === selectedId);
-      setEditModalData(selectedUserData);
-      setEditModalVisible(true);
-    }
-  };
-
   const handleCancelEdit = () => {
     setEditModalVisible(false);
   };
 
   const handleOkEdit = ({ name, email, role }) => {
-    // Implement your logic to update the data
-    // For now, just close the modal
-
     const updatedData = data.map((item) =>
       item.id === editModalData.id ? { ...item, name, email, role } : item
     );
-
     setData(updatedData);
     setFilteredData(updatedData);
-
     setEditModalVisible(false);
+  };
+
+  const handleEditUser = (id) => {
+    const selectedUserData = data.find((item) => item.id === id);
+    setEditModalData(selectedUserData);
+    setEditModalVisible(true);
+  };
+
+  const handleDeleteUser = (id) => {
+    const updatedData = data.filter((item) => item.id !== id);
+    setData(updatedData);
+    setFilteredData(updatedData);
+    setSelectedRows([]);
   };
 
   const renderRow = ({ item }) => (
@@ -102,9 +103,25 @@ const UserDetails = () => {
       }}
       onPress={() => handleSelectRow(item.id)}
     >
-      <Text>{item.name}</Text>
-      <Text>{item.email}</Text>
-      <Text>{item.role}</Text>
+      <View style={styles.UserDetailsBox}>
+        <View>
+          <Text>{item.name}</Text>
+          <Text>{item.email}</Text>
+          <Text>{item.role}</Text>
+        </View>
+        <View style={styles.actionIcons}>
+          <TouchableOpacity onPress={() => handleDeleteUser(item.id)}>
+            <View style={styles.deleteButtonText}>
+              <AntDesign name="delete" size={20} color="black" />
+            </View>
+          </TouchableOpacity>
+          <TouchableOpacity onPress={() => handleEditUser(item.id)}>
+            <View style={styles.deleteButtonText}>
+              <FontAwesome style={styles.deleteButtonText} name="edit" size={20} color="black" />
+            </View>
+          </TouchableOpacity>
+        </View>
+      </View>
     </TouchableOpacity>
   );
 
@@ -182,16 +199,7 @@ const UserDetails = () => {
         >
           <Text style={styles.deleteButtonText}>Delete Selected</Text>
         </TouchableOpacity>
-        <TouchableOpacity
-          style={[
-            styles.deleteButton,
-            { opacity: selectedRows.length === 0 ? 0.5 : 1 },
-          ]}
-          onPress={handleEditPage}
-          disabled={selectedRows.length !== 1}
-        >
-          <Text style={styles.deleteButtonText}>Edit Selected</Text>
-        </TouchableOpacity>
+
         <TouchableOpacity style={styles.deleteButton} onPress={handleDeletePage}>
           <Text style={styles.deleteButtonText}>Delete Page</Text>
         </TouchableOpacity>
